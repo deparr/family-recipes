@@ -13,7 +13,7 @@ from controllers.ErrorController import error_blueprint
 
 app = Flask(__name__)
 # allow cors on all endpoints for all domains
-CORS(app, support_credentials=True)
+CORS(app, supports_credentials=True)
 app.logger.setLevel(logging.INFO)
 
 if load_dotenv(os.getenv("ENV_PATH")):
