@@ -1,7 +1,7 @@
 from flask import current_app as app
 
-from repositories import PostRepository
-from dtos import PostDto
+from repositories import PostRepository, CommentRepository
+from dtos import PostDto, CommentDto
 from dtos.responses import DataResponse, DeleteResponse, CreateResponse
 from dtos.errors import BadRequestError
 
@@ -21,9 +21,25 @@ def validateNewPost(post: PostDto):
         raise BadRequestError(f"Need post.{badVal} to create post")
 
 
+def validateNewComment(comment: CommentDto):
+    badVal = None
+    if comment.author is None or len(comment.author) < 1:
+        badVal = "author"
+
+    if comment.postId is None or comment.postId < 1:
+        badVal = "postId"
+
+    if comment.content is None:
+        badVal = "content"
+
+    if badVal is not None:
+        raise BadRequestError(f"Need valid comment.{badVal} to create comment")
+
+
 class PostService:
     def __init__(self):
         self.postRepo = PostRepository()
+        self.commentRepo = CommentRepository()
 
     def makePost(self, post: PostDto) -> CreateResponse:
         validateNewPost(post)
@@ -56,3 +72,21 @@ class PostService:
         res = DeleteResponse(200, rowsAffected)
 
         return res
+
+    def makeComment(self, comment: CommentDto):
+        validateNewComment(comment)
+        insertedId = self.commentRepo.insertComment(
+            comment.postId, comment.author, comment.content)
+
+        return CreateResponse(201, insertedId)
+
+    def getPostComments(self, postId: int) -> DataResponse:
+        comments = self.commentRepo.getCommentsByPost(postId)
+        res = DataResponse(200, comments)
+
+        return res
+
+    def deleteComment(self, id: int) -> DeleteResponse:
+        rowsAffected: int = self.commentRepo.deleteComment(id)
+
+        return DeleteResponse(200, rowsAffected)

@@ -62,13 +62,13 @@ CREATE TABLE comment (
     author VARCHAR(16) NOT NULL,
     content TEXT NOT NULL,
     post_id INTEGER NOT NULL,
-    parent_id INTEGER,
+    created_at DATETIME,
+    edited TINY INT,
     CONSTRAINT fk_author
         FOREIGN KEY (author) REFERENCES user(username)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     FOREIGN KEY (post_id) REFERENCES post(id),
-    FOREIGN KEY (parent_id) REFERENCES comment(id)
 );
 CREATE TABLE authtoken (
     username varchar(16) NOT NULL,

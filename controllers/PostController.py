@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 
 from services import PostService
-from dtos import PostDto
+from dtos import PostDto, CommentDto
 from dtos.responses import Response
 
 post_blueprint = Blueprint('post', __name__)
@@ -41,4 +41,37 @@ def createPost() -> (Response, int):
     post: PostDto = PostDto.fromJson(data)
     ps: PostService = PostService()
     res: dict = ps.makePost(post)
+    return jsonify(res), res.status
+
+
+@post_blueprint.route('/post/<int:postId>/comment', methods=['POST'])
+def addCommentToPost(postId: int) -> (Response, int):
+    data: dict = request.get_json()
+    comment: CommentDto = CommentDto.fromJson(data)
+    comment.postId = postId
+
+    ps: PostService = PostService()
+    res: dict = ps.makeComment(comment)
+
+    return jsonify(res), res.status
+
+
+@post_blueprint.route('/post/comment/<int:commentId>', methods=['DELETE'])
+def deleteComment(commentId: int) -> (Response, int):
+    ps: PostService = PostService()
+    res: dict = ps.deleteComment(commentId)
+    return jsonify(res), res.status
+
+
+@post_blueprint.route('/post/<int:postId>/comment', methods=['GET'])
+def getPostComments(postId: int) -> (Response, int):
+    ps: PostService = PostService()
+    res: dict = ps.getPostComments(postId)
+    return jsonify(res), res.status
+
+
+@post_blueprint.route('/post/<int:postId>/comment', methods=['DELETE'])
+def deletePostComments(postId: int) -> (Response, int):
+    ps: PostService = PostService()
+    res: dict = ps.deleteAllPostComments(postId)
     return jsonify(res), res.status
